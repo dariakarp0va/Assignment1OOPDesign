@@ -4,6 +4,21 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
+
+enum class Color {
+	Red,
+	Green,
+	Blue,
+	Default
+};
+
+enum class Type {
+	Circle,
+	Line,
+	Rectangle,
+	Triangle
+};
 
 int unique_id = 0;
 
@@ -60,7 +75,22 @@ public:
 
 	void draw(Blackboard& blackboard) override {
 		if (is_filled) {
-
+			for (int x = coordinate_x - radius; x < coordinate_x + radius; x++) {
+				for (int y = coordinate_y - radius; y < coordinate_y + radius; y++) {
+					if ((x - coordinate_x) * (x - coordinate_x) + (y - coordinate_y) * (y - coordinate_y) <= radius * radius) {
+						blackboard.insert(x, y, color);
+					}
+				}
+			}
+		}
+		else {
+			for (int x = coordinate_x - radius; x < coordinate_x + radius; x++) {
+				for (int y = coordinate_y - radius; y < coordinate_y + radius; y++) {
+					if ((x - coordinate_x) * (x - coordinate_x) + (y - coordinate_y) * (y - coordinate_y) == radius * radius) {
+						blackboard.insert(x, y, color);
+					}
+				}
+			}
 		}
 	}
 	void info_print() override {
@@ -83,9 +113,7 @@ public:
 		color = Color;
 		is_filled = Is_filled;
 	}
-	void info_print() override {
-		std::cout << "id " << id << "Type: " << type << "Width " << width << "Height " << height << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
-	}
+	
 	void draw(Blackboard& blackboard) override {
 		if (is_filled) {
 			for (int x = coordinate_x; x < width + coordinate_x; x++) {
@@ -105,21 +133,123 @@ public:
 			}
 		}
 	}
+	void info_print() override {
+		std::cout << "id " << id << "Type: " << type << "Width " << width << "Height " << height << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+	}
 	~Rectangle() override;
 };
 
 class Line : public Shape {
-	// Derived class for lines
+private:
+	int length = 0;
+	std::string type = "Line";
+	bool horison = 1;
+public:
+	Line(int Length, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
+		length = Length;
+		coordinate_x = Coordinate_x;
+		coordinate_y = Coordinate_y;
+		color = Color;
+		is_filled = Is_filled;
+	}
+	void draw(Blackboard& blackboard) override {
+		if (horison) {
+			for (int x = coordinate_x; x < coordinate_x + length; x++) {
+				blackboard.insert(x, coordinate_y, color);
+			}
+		}
+		else {
+			for (int y = coordinate_y; y < coordinate_y + length; y++) {
+				blackboard.insert(coordinate_x, y, color);
+			}
+		}
+	}
+	void info_print() override {
+		std::cout << "id " << id << "Type: " << type << "Length " << length << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+	}
+
 };
 
 class Triangle : public Shape {
-	// Derived class for triangles
+private:
+	int height = 0;
+	std::string type = "Triangle";
+public:
+	Triangle(int Height, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
+		height = Height;
+		coordinate_x = Coordinate_x;
+		coordinate_y = Coordinate_y;
+		color = Color;
+		is_filled = Is_filled;
+	}
+	void draw(Blackboard& blackboard) override {
+		for (int i = 0; i < height; ++i) {
+			int numStars = 2 * i + 1;
+			int leftMost = coordinate_x - i;
+			for (int j = 0; j < numStars; ++j) {
+				int position = leftMost + j;
+				if (position >= 0 && position < BOARD_WIDTH && (coordinate_y + i) <
+					BOARD_HEIGHT && (coordinate_y + i) >= 0) {
+
+					blackboard.insert(position, coordinate_y + i, color);
+				}
+			}
+		}
+	}
+	void info_print() override {
+		std::cout << "id " << id << "Type: " << type << "Height " << height << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+	}
+
 };
 
+class Manager {
+private:
+	std::vector<std::unique_ptr<Shape>> shapes;
+
+	void Handle_Type(std::string type, std::string command, std::stringstream& ss) {
+		std::string x, y, color, radius;
+		if (command == "add") {
+			if (type == "circle") {
+				if (ss >> x >> y >> color >> radius) {
+
+				}
+			}
+			else if (type == "line") {
+
+			}
+			else if (type == "rectangle") {
+
+			}
+			else if (type == "triangle") {
+
+			}
+			else {
+				std::cout << "Invalid type";
+				return;
+			}
+		}
+		else {
+			return;
+		}
+		
+	}
+public:
+	void run(Blackboard& blackboard) {
+		while (true) {
+			std::string input_line;
+			std::getline(std::cin, input_line);
+			std::stringstream ss(input_line);
+			std::string action, shape_type;
+			ss >> action;
+			ss >> shape_type;
+			Handle_Type(shape_type, action, ss);
+		}
+	}
+};
 
 
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    
 }
