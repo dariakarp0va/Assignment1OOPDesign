@@ -58,11 +58,16 @@ public:
 	Shape(){}
 	virtual void draw(Blackboard& blackboard) = 0;
 	virtual void info_print() = 0;
+	virtual std::string add_info_for_save() = 0;
 	void remove(Blackboard& blackboard) {
 		char temp_color = color;
 		color = ' ';
 		draw(blackboard);
 		color = temp_color;
+	}
+	void move_to(int x, int y) {
+		coordinate_x += x;
+		coordinate_y += y;
 	}
 	int get_id() {
 		return id;
@@ -105,9 +110,11 @@ public:
 			}
 		}
 	}
-	
+	std::string add_info_for_save() override {
+		return "add " + type + " " + std::to_string(coordinate_x) + " " + std::to_string(coordinate_y) + " " + color + " " + std::to_string(radius) + " " + std::to_string(is_filled);
+	}
 	void info_print() override {
-		std::cout << "id " << id << "Type: " << type << "Radius " << radius << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+		std::cout << "id " << id << " Type: " << type << " Radius " << radius << " Coordinate x " << coordinate_x << " Coordinate y " << coordinate_y;
 	}
 	~Circle() override = default;
 };
@@ -148,8 +155,11 @@ public:
 			}
 		}
 	}
+	std::string add_info_for_save() override {
+		return "add " + type + " " + std::to_string(coordinate_x) + " " + std::to_string(coordinate_y) + " " + color + " " + std::to_string(width) + " " + std::to_string(height) + " " + std::to_string(is_filled);
+	}
 	void info_print() override {
-		std::cout << "id " << id << "Type: " << type << "Width " << width << "Height " << height << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+		std::cout << "id " << id << " Type: " << type << " Width " << width << " Height " << height << " Coordinate x " << coordinate_x << " Coordinate y " << coordinate_y;
 	}
 	~Rectangle() override = default;
 };
@@ -167,7 +177,7 @@ public:
 		coordinate_x = Coordinate_x;
 		coordinate_y = Coordinate_y;
 		color = Color;
-		is_filled = Is_filled;
+		horison = Is_filled;
 	}
 	void draw(Blackboard& blackboard) override {
 		if (horison) {
@@ -181,8 +191,11 @@ public:
 			}
 		}
 	}
+	std::string add_info_for_save() override {
+		return "add " + type + " " + std::to_string(coordinate_x) + " " + std::to_string(coordinate_y) + " " + color + " " + std::to_string(length) + " " + std::to_string(horison);
+	}
 	void info_print() override {
-		std::cout << "id " << id << "Type: " << type << "Length " << length << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+		std::cout << "id " << id << " Type: " << type << " Length " << length << " Coordinate x " << coordinate_x << " Coordinate y " << coordinate_y;
 	}
 	~Line() override = default;
 
@@ -234,8 +247,11 @@ public:
 		}
 		
 	}
+	std::string add_info_for_save() override {
+		return "add " + type + " " + std::to_string(coordinate_x) + " " + std::to_string(coordinate_y) + " " + color + " " + std::to_string(height) + " " + std::to_string(is_filled);
+	}
 	void info_print() override {
-		std::cout << "id " << id << "Type: " << type << "Height " << height << "Coordinate x " << coordinate_x << "Coordinate y " << coordinate_y;
+		std::cout << "id " << id << " Type: " << type << " Height " << height << " Coordinate x " << coordinate_x << " Coordinate y " << coordinate_y;
 	}
 	~Triangle() override = default;
 };
@@ -248,6 +264,7 @@ private:
 	void RenewScreen(Blackboard& blackboard) {
 		for (int i = 0; i < shapes.size(); i++) {
 			shapes[i]->remove(blackboard);
+			shapes[i]->draw(blackboard);
 		}
 		blackboard.print();
 	}
@@ -276,9 +293,9 @@ private:
 	}
 
 	void Handle_Type( std::string command, std::stringstream& ss, Blackboard& blackboard) {
-		std::string type;
-		ss >> type;
 		if (command == "add") {
+			std::string type;
+			ss >> type;
 			if (type == "circle") {
 				std::string x_str, y_str, color, radius_str;
 				bool is_filled = 0;
@@ -382,51 +399,109 @@ private:
 			std::printf("1. Circle \n 2. Rectangle \n 3. Line \n 4. Triangle \n ");
 		}
 		else if (command == "select") {
+			if (shapes.size() == 0) {
+				std::printf("no shapes on board\n");
+				return;
+			}
 			std::string id_str;
-			ss >> id_str;
-			int id = convertIntoDigit(id_str);
-			for (int i = 0; i < shapes.size(); i++) {
-				if (shapes[i]->get_id() == id) {
-					shapes[i]->info_print();
-					selected_shape = i;
-					break;
-				}
-				else {
-					if (i == shapes.size() - 1) {
-						std::printf("shape was not found");
+			if (ss >> id_str) {
+				int id = convertIntoDigit(id_str);
+				for (int i = 0; i < shapes.size(); i++) {
+					if (shapes[i]->get_id() == id) {
+						shapes[i]->info_print();
+						selected_shape = i;
+						break;
+					}
+					else {
+						if (i == shapes.size() - 1) {
+							std::printf("shape was not found\n");
+						}
 					}
 				}
 			}
+			else {
+				std::cout << "You need to pass arguments \n";
+			}
+			
+			
 		}
 		
 		else if (command == "remove") {
-			if (0 <= selected_shape < shapes.size()) {
+			if (0 <= selected_shape && selected_shape <  shapes.size()) {
 				shapes[selected_shape]->remove(blackboard);
 				shapes.erase(shapes.begin() + selected_shape);
 				RenewScreen(blackboard);
 			}
 			else {
-				std::printf("no selected shape");
+				std::printf("no selected shape\n");
 			}
 			
 		}
 		else if (command == "edit") {
-			shapes[selected_shape]->remove(blackboard);
-			shapes.erase(shapes.begin() + selected_shape);
-			Handle_Type("add", ss, blackboard);
-			RenewScreen(blackboard);
+			if (0 <= selected_shape && selected_shape < shapes.size()) {
+				shapes[selected_shape]->remove(blackboard);
+				shapes.erase(shapes.begin() + selected_shape);
+				Handle_Type("add", ss, blackboard);
+				RenewScreen(blackboard);
+			}
+			else {
+				std::printf("no selected shape\n");
+			}
+			
 		}
 		else if (command == "clear") {
 			for (int i = 0; i < shapes.size(); i++) {
 				shapes[i]->remove(blackboard);
 				shapes.erase(shapes.begin() + i);
 			}
-			std::printf("Board is cleared!");
+			std::printf("Board is cleared!\n");
 		}
 		else if (command == "move") {
+			if (0 <= selected_shape && selected_shape < shapes.size()) {
+				std::string x_str, y_str;
+				if (ss >> x_str >> y_str) {
+					int x = convertIntoDigit(x_str);
+					int y = convertIntoDigit(y_str);
+
+					shapes[selected_shape]->remove(blackboard);
+					shapes[selected_shape]->move_to(x, y);
+					RenewScreen(blackboard);
+				}
+				else {
+					std::cout << "Invalid parameters\n";
+					return;
+				}
+			}
+			else {
+				std::printf("no selected shape\n");
+			}
+			
+		}
+		else if (command == "save") {
+			std::string fileName;
+			if (ss >> fileName) {
+				std::ofstream outFile(fileName);
+
+				if (!outFile.is_open()) {
+					printf("Issues with opening file\n");
+					return;
+				}
+
+				for (int i = 0; i < shapes.size(); i++) {
+					outFile << shapes[i]->add_info_for_save();
+					outFile << "\n";
+				}
+			}
+			else {
+				std::printf("invalid parameters \n");
+			}
+			
+		}
+		else if (command == "load") {
 
 		}
 		else {
+			std::printf("no such command\n");
 			return;
 		}
 		
