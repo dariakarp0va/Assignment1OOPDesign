@@ -92,6 +92,9 @@ public:
 	int get_id() {
 		return id;
 	}
+	void paint(char Color) {
+		color = Color;
+	}
 	virtual ~Shape() = default;
 };
 
@@ -519,6 +522,23 @@ private:
 				std::printf("no selected shape\n");
 			}
 			
+		}
+		else if (command == "paint") {
+			if (0 <= selected_shape && selected_shape < shapes.size()) {
+				std::string color;
+				if (ss >> color){
+					shapes[selected_shape]->remove(blackboard);
+					shapes[selected_shape]->paint(color[0]);
+					RenewScreen(blackboard);
+				}
+				else {
+					std::cout << "Invalid parameters\n";
+					return;
+				}
+			}
+			else {
+				std::printf("no selected shape\n");
+			}
 		}
 		else if (command == "save") {
 			std::string fileName;
