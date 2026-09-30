@@ -6,12 +6,39 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include "Shape.h"
+
+A a;
 
 
 int unique_id = 0;
 
 const int BOARD_WIDTH = 80;
 const int BOARD_HEIGHT = 25;
+
+int convertIntoDigit(std::string lineNum)
+{
+	bool isDigit = false;
+	while (!isDigit)
+	{
+		bool isSymbolDigit = true;
+		for (int i = 0; i < lineNum.length(); i++)
+		{
+			if (!isdigit(lineNum[i]))
+			{
+				isSymbolDigit = false;
+			}
+		}
+		isDigit = isSymbolDigit;
+		if (isDigit == false)
+		{
+			printf("input should be numeric \n");
+			return -1;
+		}
+	}
+	int LineNum = std::stoll(lineNum);
+	return LineNum;
+}
 
 class Blackboard {
 private:
@@ -76,6 +103,7 @@ public:
 	virtual void draw(Blackboard& blackboard) = 0;
 	virtual void info_print() = 0;
 	virtual std::string add_info_for_save() = 0;
+	virtual void edit(Blackboard& blackboard, std::stringstream& ss) = 0;
 	void remove(Blackboard& blackboard) {
 		char temp_color = color;
 		color = ' ';
@@ -101,7 +129,6 @@ public:
 class Circle : public Shape {
 private:
 	int radius = 0;
-	std::string type = "circle";
 public:
 	Circle(int Radius, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
 		id = unique_id;
@@ -111,6 +138,7 @@ public:
 		coordinate_y = Coordinate_y;
 		color = Color;
 		is_filled = Is_filled;
+		type = "circle";
 	}
 
 	void draw(Blackboard& blackboard) override {
@@ -131,6 +159,22 @@ public:
 					}
 				}
 			}
+		}             
+	}
+	void edit(Blackboard& blackboard, std::stringstream& ss){
+		std::string type;
+		ss >> type;
+		if (type == "circle") {
+			std::string x_str, y_str, color, radius_str;
+			bool is_filled = 0;
+			if (ss >> x_str >> y_str >> color >> radius_str >> is_filled) {
+				int x = convertIntoDigit(x_str);
+				int y = convertIntoDigit(y_str);
+				int radius = convertIntoDigit(radius_str);
+				if (x < 0 || y < 0 || radius < 0 || x + radius > BOARD_WIDTH || y + radius > BOARD_HEIGHT || x - radius < 0 || y - radius < 0) {
+
+				}
+			}
 		}
 	}
 	std::string add_info_for_save() override {
@@ -146,7 +190,6 @@ class Rectangle : public Shape {
 private:
 	int width = 0;
 	int height = 0;
-	std::string type = "rectangle";
 public:
 	Rectangle(int Width,int Height, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
 		id = unique_id;
@@ -157,6 +200,7 @@ public:
 		coordinate_y = Coordinate_y;
 		color = Color;
 		is_filled = Is_filled;
+		type = "rectangle";
 	}
 	
 	void draw(Blackboard& blackboard) override {
@@ -178,6 +222,48 @@ public:
 			}
 		}
 	}
+	void edit(Blackboard& blackboard, std::stringstream& ss) {
+		std::string type;
+		ss >> type;
+		if (type == "rectangle") {
+			std::string x_str, y_str, color_temp, width_str, height_str;
+			bool is_filled_temp = 0;
+			if (ss >> x_str >> y_str >> color >> width_str >> height_str >> is_filled) {
+				int x = convertIntoDigit(x_str);
+				int y = convertIntoDigit(y_str);
+				int width_temp = convertIntoDigit(width_str);
+				int height_temp = convertIntoDigit(height_str);
+				if (x > 0 && x < BOARD_WIDTH && y > 0 && y > BOARD_HEIGHT && width_temp < BOARD_WIDTH && height_temp < BOARD_HEIGHT) {
+					if (y + height_temp >= BOARD_HEIGHT) {
+						height_temp = BOARD_HEIGHT - y;
+					}
+					else {
+						height_temp = y;
+					}
+					if (x + width_temp >= BOARD_WIDTH) {
+						width_temp = BOARD_WIDTH - x;
+					}
+					else {
+						width_temp = x;
+					}
+
+					coordinate_x = x;
+					coordinate_y = y;
+					color = color_temp[0];
+					is_filled = is_filled_temp;
+				}
+				else {
+					std::cout << "Parametrs out of the board\n";
+				}
+			}
+			else {
+				std::cout << "Invalid parametrs\n";
+			}
+		}
+		else {
+			std::cout << "You can`t change the type of shape\n";
+		}
+	}
 	std::string add_info_for_save() override {
 		return "add " + type + " " + std::to_string(coordinate_x) + " " + std::to_string(coordinate_y) + " " + color + " " + std::to_string(width) + " " + std::to_string(height) + " " + std::to_string(is_filled);
 	}
@@ -190,7 +276,6 @@ public:
 class Line : public Shape {
 private:
 	int length = 0;
-	std::string type = "line";
 	bool horison = 1;
 public:
 	Line(int Length, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
@@ -201,6 +286,7 @@ public:
 		coordinate_y = Coordinate_y;
 		color = Color;
 		horison = Is_filled;
+		type = "line";
 	}
 	void draw(Blackboard& blackboard) override {
 		if (horison) {
@@ -212,6 +298,44 @@ public:
 			for (int y = coordinate_y; y < coordinate_y + length; y++) {
 				blackboard.insert(coordinate_x, y, color);
 			}
+		}
+	}
+	void edit(Blackboard& blackboard, std::stringstream& ss) {
+		std::string type;
+		ss >> type;
+		if (type == "rectangle") {
+			std::string x_str, y_str, color_temp, lenght_str;
+			bool is_filled_temp = 0;
+			if (ss >> x_str >> y_str >> color >> lenght_str >> is_filled) {
+				int x = convertIntoDigit(x_str);
+				int y = convertIntoDigit(y_str);
+				int lenght_temp = convertIntoDigit(lenght_str);
+				if (x > 0 && x < BOARD_WIDTH && y > 0 && y > BOARD_HEIGHT && lenght_temp < BOARD_HEIGHT) {
+					if (y + lenght_temp >= BOARD_HEIGHT && is_filled_temp == 0) {
+						length = BOARD_HEIGHT - y;
+					}
+					else if (x + lenght_temp >= BOARD_WIDTH && is_filled_temp == 1) {
+						length = BOARD_WIDTH - x;
+					}
+					else {
+						length = lenght_temp;
+					}
+
+					coordinate_x = x;
+					coordinate_y = y;
+					color = color_temp[0];
+					is_filled = is_filled_temp;
+				}
+				else {
+					std::cout << "Parametrs out of the board\n";
+				}
+			}
+			else {
+				std::cout << "Invalid parametrs\n";
+			}
+		}
+		else {
+			std::cout << "You can`t change the type of shape\n";
 		}
 	}
 	std::string add_info_for_save() override {
@@ -228,7 +352,6 @@ class Triangle : public Shape {
 private:
 
 	int height = 0;
-	std::string type = "triangle";
 public:
 	Triangle(int Height, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
 		id = unique_id;
@@ -238,6 +361,7 @@ public:
 		coordinate_y = Coordinate_y;
 		color = Color;
 		is_filled = Is_filled;
+		type = "triangle";
 	}
 	void draw(Blackboard& blackboard) override {
 		if (is_filled) {
@@ -273,6 +397,38 @@ public:
 		}
 		
 	}
+	void edit(Blackboard& blackboard, std::stringstream& ss) {
+
+		std::string type;
+		ss >> type;
+		if (type == "rectangle") {
+			std::string x_str, y_str, color_temp, height_str;
+			bool is_filled_temp = 0;
+			if (ss >> x_str >> y_str >> color >> height_str >> is_filled) {
+				int x = convertIntoDigit(x_str);
+				int y = convertIntoDigit(y_str);
+				int height_temp = convertIntoDigit(height_str);
+				if (x > 0 && x < BOARD_WIDTH && y > 0 && y > BOARD_HEIGHT && height_temp < BOARD_HEIGHT){
+					
+					height = height_temp;
+					coordinate_x = x;
+					coordinate_y = y;
+					color = color_temp[0];
+					is_filled = is_filled_temp;
+				}
+				else {
+					std::cout << "Parametrs out of the board\n";
+				}
+			}
+			
+			else {
+				std::cout << "Invalid parametrs\n";
+			}
+		}
+		else {
+			std::cout << "You can`t change the type of shape\n";
+		}
+	}
 	std::string add_info_for_save() override {
 		return "add " + type + " " + std::to_string(coordinate_x) + " " + std::to_string(coordinate_y) + " " + color + " " + std::to_string(height) + " " + std::to_string(is_filled);
 	}
@@ -294,29 +450,7 @@ private:
 		}
 		blackboard.print();
 	}
-	int convertIntoDigit(std::string lineNum)
-	{
-		bool isDigit = false;
-		while (!isDigit)
-		{
-			bool isSymbolDigit = true;
-			for (int i = 0; i < lineNum.length(); i++)
-			{
-				if (!isdigit(lineNum[i]))
-				{
-					isSymbolDigit = false;
-				}
-			}
-			isDigit = isSymbolDigit;
-			if (isDigit == false)
-			{
-				printf("input should be numeric \n");
-				return -1;
-			}
-		}
-		int LineNum = std::stoll(lineNum);
-		return LineNum;
-	}
+	
 
 	void Handle_Type( std::string command, std::stringstream& ss, Blackboard& blackboard) {
 		if (command == "add") {
@@ -397,7 +531,7 @@ private:
 					int x = convertIntoDigit(x_str);
 					int y = convertIntoDigit(y_str);
 					int height = convertIntoDigit(heigth_str);
-					if (x < 0 || y < 0 || height < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT || y + height > BOARD_HEIGHT  || x - height < 0 || x + height > BOARD_WIDTH){
+					if (x < 0 || y < 0 || height < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT ) {
 						std::cout << "Parameters out of the board\n";
 						return;
 					}
