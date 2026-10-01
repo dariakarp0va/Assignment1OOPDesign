@@ -40,9 +40,13 @@ int convertIntoDigit(std::string lineNum)
 	return LineNum;
 }
 
+class Shape;
+
 class Blackboard {
 private:
 	std::vector<std::vector<char>> grid;
+	std::vector<std::unique_ptr<Shape>> shapes;
+	int selected_shape = -1;
 
 public:
 	Blackboard() : grid(BOARD_HEIGHT, std::vector<char>(BOARD_WIDTH, ' ')) {}
@@ -91,6 +95,23 @@ public:
 		}
 		
 	}
+	bool is_clone(std::unique_ptr<Shape>& shape) {
+		for (int i = 0; i < shapes.size(); i++) {
+			if (shapes[i]->add_info_for_save() == shape->add_info_for_save()) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+	std::vector<std::unique_ptr<Shape>>& get_shapes() {
+		return shapes;
+	}
+	int get_selected_shape() {
+		return selected_shape;
+	}
+	void select(int shape) {
+		selected_shape = shape;
+	}
 
 };
 class Shape {
@@ -100,6 +121,7 @@ protected:
 	int coordinate_y = 0;
 	char color = '*';
 	bool is_filled = 0;
+	bool is_valid = 1;
 	std::string type;
 public:
 	Shape(){}
@@ -107,6 +129,7 @@ public:
 	virtual void info_print() = 0;
 	virtual std::string add_info_for_save() = 0;
 	virtual void edit(Blackboard& blackboard, std::stringstream& ss) = 0;
+	virtual bool contains(int target_x, int target_y) = 0;
 	void remove(Blackboard& blackboard) {
 		char temp_color = color;
 		color = ' ';
@@ -122,6 +145,9 @@ public:
 			std::cout << "Inlavid parameters\n";
 		}
 		
+	}
+	bool check_valid() {
+		return is_valid;
 	}
 	std::string get_type() {
 		return type;
@@ -139,15 +165,33 @@ class Circle : public Shape {
 private:
 	int radius = 0;
 public:
-	Circle(int Radius, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
-		id = unique_id;
-		unique_id++;
-		radius = Radius;
-		coordinate_x = Coordinate_x;
-		coordinate_y = Coordinate_y;
-		color = Color;
-		is_filled = Is_filled;
-		type = "circle";
+	Circle(std::stringstream& ss) {
+		std::string x_str, y_str, color_temp, radius_str;
+		bool Is_filled = 0;
+		if (ss >> x_str >> y_str >> color_temp >> radius_str >> Is_filled) {
+			int x = convertIntoDigit(x_str);
+			int y = convertIntoDigit(y_str);
+			int radius_temp = convertIntoDigit(radius_str);
+			if (x < 0 || y < 0 || radius_temp < 0) {
+				std::cout << "Parameters out of the board\n";
+				is_valid = 0;
+				return;
+			}
+
+			id = unique_id;
+			unique_id++;
+			radius = radius_temp;
+			coordinate_x = x;
+			coordinate_y = y;
+			color = color_temp[0];
+			is_filled = Is_filled;
+			type = "circle";
+		}
+		else {
+			std::cout << "Invalid parameters\n";
+			is_valid = 0;
+		}
+		
 	}
 
 	void draw(Blackboard& blackboard) override {
@@ -207,16 +251,34 @@ private:
 	int width = 0;
 	int height = 0;
 public:
-	Rectangle(int Width,int Height, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
-		id = unique_id;
-		unique_id++;
-		width = Width;
-		height = Height;
-		coordinate_x = Coordinate_x;
-		coordinate_y = Coordinate_y;
-		color = Color;
-		is_filled = Is_filled;
-		type = "rectangle";
+	Rectangle(std::stringstream& ss) {
+		std::string x_str, y_str, Color, width_str, heigth_str;
+		bool Is_filled = 0;
+		if (ss >> x_str >> y_str >> Color >> width_str >> heigth_str >> Is_filled) {
+			int x = convertIntoDigit(x_str);
+			int y = convertIntoDigit(y_str);
+			int Width = convertIntoDigit(width_str);
+			int Height = convertIntoDigit(heigth_str);
+			if (x < 0 || y < 0 || Width < 0 || Height < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT) {
+				std::cout << "Parameters out of the board\n";
+				is_valid = 0;
+				return;
+			}
+			id = unique_id;
+			unique_id++;
+			width = Width;
+			height = Height;
+			coordinate_x = x;
+			coordinate_y = y;
+			color = Color[0];
+			is_filled = Is_filled;
+			type = "rectangle";
+		}
+		else {
+			std::cout << "Invalid parameters\n";
+			is_valid = 0;
+			return;
+		}
 	}
 	
 	void draw(Blackboard& blackboard) override {
@@ -284,15 +346,32 @@ private:
 	int length = 0;
 	bool horison = 1;
 public:
-	Line(int Length, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
-		id = unique_id;
-		unique_id++;
-		length = Length;
-		coordinate_x = Coordinate_x;
-		coordinate_y = Coordinate_y;
-		color = Color;
-		horison = Is_filled;
-		type = "line";
+	Line(std::stringstream& ss) {
+		std::string x_str, y_str, Color, lenght_str;
+		bool Horison = 0;
+		if (ss >> x_str >> y_str >> Color >> lenght_str >> Horison) {
+			int x = convertIntoDigit(x_str);
+			int y = convertIntoDigit(y_str);
+			int Length = convertIntoDigit(lenght_str);
+			if (x < 0 || y < 0 || Length < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT) {
+				std::cout << "Parameters out of the board\n";
+				is_valid = 0;
+				return;
+			}
+			id = unique_id;
+			unique_id++;
+			length = Length;
+			coordinate_x = x;
+			coordinate_y = y;
+			color = Color[0];
+			horison = Horison;
+			type = "line";
+
+		}
+		else {
+			std::cout << "Invalid parameters\n";
+			is_valid = 0;
+		}
 	}
 	void draw(Blackboard& blackboard) override {
 		if (horison) {
@@ -351,15 +430,34 @@ private:
 
 	int height = 0;
 public:
-	Triangle(int Height, int Coordinate_x, int Coordinate_y, char Color, bool Is_filled) {
-		id = unique_id;
-		unique_id++;
-		height = Height;
-		coordinate_x = Coordinate_x;
-		coordinate_y = Coordinate_y;
-		color = Color;
-		is_filled = Is_filled;
-		type = "triangle";
+	Triangle(std::stringstream& ss) {
+		std::string x_str, y_str, Color, width_str, heigth_str;
+		bool Is_filled = 0;
+		if (ss >> x_str >> y_str >> Color >> heigth_str >> Is_filled) {
+			int x = convertIntoDigit(x_str);
+			int y = convertIntoDigit(y_str);
+			int Height = convertIntoDigit(heigth_str);
+			if (x < 0 || y < 0 || Height < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT) {
+				std::cout << "Parameters out of the board\n";
+				is_valid = 0;
+				return;
+			}
+			id = unique_id;
+			unique_id++;
+			height = Height;
+			coordinate_x = x;
+			coordinate_y = y;
+			color = Color[0];
+			is_filled = Is_filled;
+			type = "triangle";
+
+		}
+		else {
+			std::cout << "Invalid parameters\n";
+			is_valid = 0;
+			return;
+		}
+		
 	}
 	void draw(Blackboard& blackboard) override {
 		if (is_filled) {
@@ -438,110 +536,58 @@ public:
 
 class Manager {
 private:
-	std::vector<std::unique_ptr<Shape>> shapes;
-	int selected_shape = -1;
-
+	
 	void RenewScreen(Blackboard& blackboard) {
-		for (int i = 0; i < shapes.size(); i++) {
-			shapes[i]->remove(blackboard);
-			shapes[i]->draw(blackboard);
+		std::vector<std::unique_ptr<Shape>>& shapes = blackboard.get_shapes();
+		for (int i = 0; i < blackboard.get_shapes().size(); i++) {
+			blackboard.get_shapes()[i]->remove(blackboard);
+			blackboard.get_shapes()[i]->draw(blackboard);
 		}
 		blackboard.print();
 	}
 	
 
 	void Handle_Type( std::string command, std::stringstream& ss, Blackboard& blackboard) {
+		std::vector<std::unique_ptr<Shape>>& shapes = blackboard.get_shapes();
 		if (command == "add") {
 			std::string type;
 			ss >> type;
 			if (type == "circle") {
-				std::string x_str, y_str, color, radius_str;
-				bool is_filled = 0;
-				if (ss >> x_str >> y_str >> color >> radius_str >> is_filled) {
-					int x = convertIntoDigit(x_str);
-					int y = convertIntoDigit(y_str);
-					int radius = convertIntoDigit(radius_str);
-					if (x < 0 || y < 0 || radius < 0 ) {
-						std::cout << "Parameters out of the board\n";
-						return;
+				std::unique_ptr<Shape> circle = std::make_unique<Circle>(ss);
+				if (circle->check_valid()) {
+					if (!blackboard.is_clone(circle)) {
+						circle->draw(blackboard);
+						blackboard.get_shapes().push_back(std::move(circle));
 					}
-					std::unique_ptr<Shape> circle = std::make_unique<Circle>(radius, x, y, color[0], is_filled);
-
-					circle->draw(blackboard);
-					shapes.push_back(std::move(circle));
-					
-				}
-				else {
-					std::cout << "Invalid parameters\n";
-					return;
+					else {
+						std::cout << "Can`t add the same shapes on board\n";
+					}
 				}
 			}
 
 			else if (type == "line") {
-				std::string x_str, y_str, color, lenght_str;
-				bool horison = 0;
-				if (ss >> x_str >> y_str >> color >> lenght_str >> horison) {
-					int x = convertIntoDigit(x_str);
-					int y = convertIntoDigit(y_str);
-					int length = convertIntoDigit(lenght_str);
-					if (x < 0 || y < 0 || length < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT ) {
-						std::cout << "Parameters out of the board\n";
-						return;
-					}
-					std::unique_ptr<Shape> line = std::make_unique<Line>(length, x, y, color[0], horison);
-
+				
+				std::unique_ptr<Shape> line = std::make_unique<Line>(ss);
+				if (line->check_valid()) {
 					line->draw(blackboard);
-					shapes.push_back(std::move(line));
-
-				}
-				else {
-					std::cout << "Invalid parameters\n";
-					return;
+					blackboard.get_shapes().push_back(std::move(line));
 				}
 			}
 
 			else if (type == "rectangle") {
-				std::string x_str, y_str, color, width_str, heigth_str;
-				bool is_filled = 0;
-				if (ss >> x_str >> y_str >> color >> width_str >> heigth_str >> is_filled) {
-					int x = convertIntoDigit(x_str);
-					int y = convertIntoDigit(y_str);
-					int width = convertIntoDigit(width_str);
-					int height = convertIntoDigit(heigth_str);
-					if (x < 0 || y < 0 || width < 0 || height < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT ) {
-						std::cout << "Parameters out of the board\n";
-						return;
-					}
-					std::unique_ptr<Shape> rectangle = std::make_unique<Rectangle>(width, height, x, y, color[0], is_filled);
-
+				
+				std::unique_ptr<Shape> rectangle = std::make_unique<Rectangle>(ss);
+				if (rectangle->check_valid()) {
 					rectangle->draw(blackboard);
-					shapes.push_back(std::move(rectangle));
-				}
-				else {
-					std::cout << "Invalid parameters\n";
-					return;
+					blackboard.get_shapes().push_back(std::move(rectangle));
 				}
 			}
 			else if (type == "triangle") {
-				std::string x_str, y_str, color, width_str, heigth_str;
-				bool is_filled = 0;
-				if (ss >> x_str >> y_str >> color >> heigth_str >> is_filled) {
-					int x = convertIntoDigit(x_str);
-					int y = convertIntoDigit(y_str);
-					int height = convertIntoDigit(heigth_str);
-					if (x < 0 || y < 0 || height < 0 || x > BOARD_WIDTH || y > BOARD_HEIGHT ) {
-						std::cout << "Parameters out of the board\n";
-						return;
-					}
-					std::unique_ptr<Shape> triangle = std::make_unique<Triangle>( height, x, y, color[0], is_filled);
-
+				
+				std::unique_ptr<Shape> triangle = std::make_unique<Triangle>(ss);
+				if (triangle->check_valid()) {
 					triangle->draw(blackboard);
-					shapes.push_back(std::move(triangle));
-
-				}
-				else {
-					std::cout << "Invalid parameters\n";
-					return;
+					blackboard.get_shapes().push_back(std::move(triangle));
 				}
 			}
 			else {
@@ -553,25 +599,25 @@ private:
 			blackboard.print();
 		}
 		else if (command == "list") {
-			for (int i = 0; i < shapes.size(); i++) {
-				shapes[i]->info_print();
+			for (int i = 0; i < blackboard.get_shapes().size(); i++) {
+				blackboard.get_shapes()[i]->info_print();
 			}
 		}
 		else if (command == "shapes") {
 			std::printf("1. Circle: x y color radius is_filled \n 2. Rectangle: x y color width heigth is_filled \n 3. Line: x y color lenght is_horisontal \n 4. Triangle: x y color heigth is_filled \n ");
 		}
 		else if (command == "select") {
-			if (shapes.size() == 0) {
+			if (blackboard.get_shapes().size() == 0) {
 				std::printf("no shapes on board\n");
 				return;
 			}
 			std::string id_str;
 			if (ss >> id_str) {
 				int id = convertIntoDigit(id_str);
-				for (int i = 0; i < shapes.size(); i++) {
-					if (shapes[i]->get_id() == id) {
+				for (int i = 0; i < blackboard.get_shapes().size(); i++) {
+					if (blackboard.get_shapes()[i]->get_id() == id) {
 						shapes[i]->info_print();
-						selected_shape = i;
+						blackboard.select(i);
 						break;
 					}
 					else {
@@ -589,11 +635,11 @@ private:
 		}
 		
 		else if (command == "remove") {
-			if (0 <= selected_shape && selected_shape <  shapes.size()) {
-				shapes[selected_shape]->remove(blackboard);
-				shapes.erase(shapes.begin() + selected_shape);
+			if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() <  shapes.size()) {
+				shapes[blackboard.get_selected_shape()]->remove(blackboard);
+				shapes.erase(shapes.begin() + blackboard.get_selected_shape());
 				RenewScreen(blackboard);
-				selected_shape = -1;
+				blackboard.select(-1);
 			}
 			else {
 				std::printf("no selected shape\n");
@@ -601,9 +647,9 @@ private:
 			
 		}
 		else if (command == "edit") {
-			if (0 <= selected_shape && selected_shape < shapes.size()) {
-				shapes[selected_shape]->remove(blackboard);
-				shapes[selected_shape]->edit(blackboard, ss);
+			if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
+				shapes[blackboard.get_selected_shape()]->remove(blackboard);
+				shapes[blackboard.get_selected_shape()]->edit(blackboard, ss);
 				RenewScreen(blackboard);
 			}
 			else {
@@ -617,19 +663,24 @@ private:
 				shapes[i]->remove(blackboard);
 			}
 			shapes.clear();
-			selected_shape = -1;
+			blackboard.select(-1);
 			std::printf("Board is cleared!\n");
 		}
 		else if (command == "move") {
-			if (0 <= selected_shape && selected_shape < shapes.size()) {
+			if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
 				std::string x_str, y_str;
 				if (ss >> x_str >> y_str) {
 					int x = convertIntoDigit(x_str);
 					int y = convertIntoDigit(y_str);
-
-					shapes[selected_shape]->remove(blackboard);
-					shapes[selected_shape]->move_to(x, y);
-					RenewScreen(blackboard);
+					if (x >= 0 && y >= 0 && x < BOARD_WIDTH && y < BOARD_HEIGHT) {
+						shapes[blackboard.get_selected_shape()]->remove(blackboard);
+						shapes[blackboard.get_selected_shape()]->move_to(x, y);
+						RenewScreen(blackboard);
+					}
+					else {
+						std::cout << "Invalid coordinates\n";
+					}
+					
 				}
 				else {
 					std::cout << "Invalid parameters\n";
@@ -642,11 +693,11 @@ private:
 			
 		}
 		else if (command == "paint") {
-			if (0 <= selected_shape && selected_shape < shapes.size()) {
+			if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
 				std::string color;
 				if (ss >> color){
-					shapes[selected_shape]->remove(blackboard);
-					shapes[selected_shape]->paint(color[0]);
+					shapes[blackboard.get_selected_shape()]->remove(blackboard);
+					shapes[blackboard.get_selected_shape()]->paint(color[0]);
 					RenewScreen(blackboard);
 				}
 				else {
@@ -725,7 +776,7 @@ public:
 			ss >> action;
 			Handle_Type( action, ss, blackboard);
 		} 
-	}
+	} 
 };
 
 
