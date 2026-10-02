@@ -8,8 +8,6 @@
 #include <fstream>
 #include "Shape.h"
 
-A a;
-
 
 int unique_id = 0;
 
@@ -214,6 +212,31 @@ public:
 			}
 		}             
 	}
+	bool contains(int target_x, int target_y) override {
+		if (is_filled) {
+			for (int x = coordinate_x - radius; x <= coordinate_x + radius; x++) {
+				for (int y = coordinate_y - radius; y <= coordinate_y + radius; y++) {
+					if ((x - coordinate_x) * (x - coordinate_x) + (y - coordinate_y) * (y - coordinate_y) <= radius * radius + radius) {
+						if (x == target_x && y == target_y) {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		else {
+			for (int x = coordinate_x - radius; x <= coordinate_x + radius; x++) {
+				for (int y = coordinate_y - radius; y <= coordinate_y + radius; y++) {
+					if ((x - coordinate_x) * (x - coordinate_x) + (y - coordinate_y) * (y - coordinate_y) < radius * radius + radius && (x - coordinate_x) * (x - coordinate_x) + (y - coordinate_y) * (y - coordinate_y) > radius * radius - radius) {
+						if (x == target_x && y == target_y) {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		return 0;
+	}
 	void edit(Blackboard& blackboard, std::stringstream& ss){
 		std::string type;
 		ss >> type;
@@ -300,6 +323,30 @@ public:
 			}
 		}
 	}
+	bool contains(int target_x, int target_y) override {
+		if (is_filled) {
+			for (int x = coordinate_x; x < width + coordinate_x; x++) {
+				for (int y = coordinate_y; y < height + coordinate_y; y++) {
+					if (x == target_x && y == target_y) {
+						return 1;
+					}
+				}
+			}
+		}
+		else {
+			for (int x = coordinate_x; x < width + coordinate_x; x++) {
+				for (int y = coordinate_y; y < height + coordinate_y; y++) {
+					if (x == coordinate_x || y == coordinate_y || x == width + coordinate_x - 1 || y == height + coordinate_y - 1) {
+						if (x == target_x && y == target_y) {
+							return 1;
+						}
+					}
+
+				}
+			}
+		}
+		return 0;
+	}
 	void edit(Blackboard& blackboard, std::stringstream& ss) {
 		std::string type;
 		ss >> type;
@@ -384,6 +431,23 @@ public:
 				blackboard.insert(coordinate_x, y, color);
 			}
 		}
+	}
+	bool contains(int target_x, int target_y) override {
+		if (horison) {
+			for (int x = coordinate_x; x < coordinate_x + length; x++) {
+				if (x == target_x ) {
+					return 1;
+				}
+			}
+		}
+		else {
+			for (int y = coordinate_y; y < coordinate_y + length; y++) {
+				if (y == target_y) {
+					return 1;
+				}
+			}
+		}
+		return 0;
 	}
 	void edit(Blackboard& blackboard, std::stringstream& ss) {
 		std::string type;
@@ -492,6 +556,43 @@ public:
 			}
 		}
 		
+	}
+	bool contains(int target_x, int target_y) override {
+		if (is_filled) {
+			for (int i = 0; i < height; ++i) {
+				int numStars = 2 * i + 1;
+				int leftMost = coordinate_x - i;
+				for (int j = 0; j < numStars; ++j) {
+					int position = leftMost + j;
+					if (position >= 0 && position < BOARD_WIDTH && (coordinate_y + i) <
+						BOARD_HEIGHT && (coordinate_y + i) >= 0) {
+						if (position == target_x && coordinate_y + i == target_y) {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < height; ++i) {
+				int numStars = 2 * i + 1;
+				int leftMost = coordinate_x - i;
+				for (int j = 0; j < numStars; ++j) {
+					int position = leftMost + j;
+					if (position >= 0 && position < BOARD_WIDTH && (coordinate_y + i) <
+						BOARD_HEIGHT && (coordinate_y + i) >= 0) {
+
+						if (position == leftMost || position == leftMost + numStars - 1 || i == height - 1) {
+							if (position == target_x && coordinate_y + i == target_y) {
+								return 1;
+							}
+						}
+
+					}
+				}
+			}
+		}
+		return 0;
 	}
 	void edit(Blackboard& blackboard, std::stringstream& ss) {
 
@@ -612,17 +713,31 @@ private:
 				return;
 			}
 			std::string id_str;
-			if (ss >> id_str) {
-				int id = convertIntoDigit(id_str);
-				for (int i = 0; i < blackboard.get_shapes().size(); i++) {
-					if (blackboard.get_shapes()[i]->get_id() == id) {
-						shapes[i]->info_print();
-						blackboard.select(i);
-						break;
+			std::string x_str, y_str;
+			if (ss >> x_str) {
+				if (ss >> y_str) {
+					int x = convertIntoDigit(x_str);
+					int y = convertIntoDigit(y_str);
+					for (int i = blackboard.get_shapes().size() - 1; i >= 0; i--) {
+						if (blackboard.get_shapes()[i]->contains(x, y)) {
+							shapes[i]->info_print();
+							blackboard.select(i);
+							break;
+						}
 					}
-					else {
-						if (i == shapes.size() - 1) {
-							std::printf("shape was not found\n");
+				}
+				else {
+					int id = convertIntoDigit(x_str);
+					for (int i = 0; i < blackboard.get_shapes().size(); i++) {
+						if (blackboard.get_shapes()[i]->get_id() == id) {
+							shapes[i]->info_print();
+							blackboard.select(i);
+							break;
+						}
+						else {
+							if (i == shapes.size() - 1) {
+								std::printf("shape was not found\n");
+							}
 						}
 					}
 				}
