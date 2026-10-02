@@ -7,6 +7,8 @@
 #include "Blackboard.h"
 #include "const.h"
 
+int Shape::unique_id = 0;
+
 void Shape::remove(Blackboard& blackboard) {
 	char temp_color = color;
 	color = ' ';

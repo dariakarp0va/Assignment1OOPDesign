@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <string>
@@ -15,7 +16,7 @@ public:
 
 	void draw(Blackboard& blackboard) override;
 	bool contains(int target_x, int target_y) override;
-	void edit(Blackboard& blackboard, std::stringstream& ss);
+	void edit(Blackboard& blackboard, std::stringstream& ss) override;
 	std::string add_info_for_save() override;
 	void info_print() override;
 	~Circle() override = default;

@@ -1,6 +1,18 @@
+#pragma once
 
+class Blackboard;
 
 class Shape {
+protected:
+	int id = 0;
+	int coordinate_x = 0;
+	int coordinate_y = 0;
+	char color = '*';
+	bool is_filled = 0;
+	bool is_valid = 1;
+	std::string type;
+	static int unique_id;
+public:
 	virtual void draw(Blackboard& blackboard) = 0;
 	virtual void info_print() = 0;
 	virtual std::string add_info_for_save() = 0;
