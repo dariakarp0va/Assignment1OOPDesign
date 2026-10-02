@@ -1,28 +1,27 @@
-add circle 70 10 y 10 1
-add triangle 10 10 m 10 1
+add triangle 10 20 p 10 0
 end
-                                                                   yyyyyyy      
-                                                                 yyyyyyyyyyy    
-                                                                yyyyyyyyyyyyy   
-                                                               yyyyyyyyyyyyyyy  
-                                                              yyyyyyyyyyyyyyyyy 
-                                                             yyyyyyyyyyyyyyyyyyy
-                                                             yyyyyyyyyyyyyyyyyyy
-                                                            yyyyyyyyyyyyyyyyyyyy
-                                                            yyyyyyyyyyyyyyyyyyyy
-                                                            yyyyyyyyyyyyyyyyyyyy
-          m                                                 yyyyyyyyyyyyyyyyyyyy
-         mmm                                                yyyyyyyyyyyyyyyyyyyy
-        mmmmm                                               yyyyyyyyyyyyyyyyyyyy
-       mmmmmmm                                              yyyyyyyyyyyyyyyyyyyy
-      mmmmmmmmm                                              yyyyyyyyyyyyyyyyyyy
-     mmmmmmmmmmm                                             yyyyyyyyyyyyyyyyyyy
-    mmmmmmmmmmmmm                                             yyyyyyyyyyyyyyyyy 
-   mmmmmmmmmmmmmmm                                             yyyyyyyyyyyyyyy  
-  mmmmmmmmmmmmmmmmm                                             yyyyyyyyyyyyy   
- mmmmmmmmmmmmmmmmmmm                                             yyyyyyyyyyy    
-                                                                   yyyyyyy      
                                                                                 
                                                                                 
                                                                                 
                                                                                 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+          p                                                                     
+         p p                                                                    
+        p   p                                                                   
+       p     p                                                                  
+      p       p                                                                 

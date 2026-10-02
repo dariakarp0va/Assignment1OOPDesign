@@ -7,17 +7,15 @@
 #include "const.h"
 
 void Manager::RenewScreen(Blackboard& blackboard) {
-	std::vector<std::unique_ptr<Shape>>& shapes = blackboard.get_shapes();
-	for (int i = 0; i < blackboard.get_shapes().size(); i++) {
-		blackboard.get_shapes()[i]->remove(blackboard);
-		blackboard.get_shapes()[i]->draw(blackboard);
+	for (int i = 0; i < blackboard.size_count(); i++) {
+		blackboard.get_shape(i)->remove(blackboard);
+		blackboard.get_shape(i)->draw(blackboard);
 	}
 	blackboard.print();
 }
 
 
 void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard& blackboard) {
-	std::vector<std::unique_ptr<Shape>>& shapes = blackboard.get_shapes();
 	if (command == "add") {
 		std::string type;
 		ss >> type;
@@ -26,7 +24,7 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 			if (circle->check_valid()) {
 				if (!blackboard.is_clone(circle)) {
 					circle->draw(blackboard);
-					blackboard.get_shapes().push_back(std::move(circle));
+					blackboard.add_shape(std::move(circle));
 				}
 				else {
 					std::cout << "Can`t add the same shapes on board\n";
@@ -40,7 +38,7 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 			if (line->check_valid()) {
 				if (!blackboard.is_clone(line)) {
 					line->draw(blackboard);
-					blackboard.get_shapes().push_back(std::move(line));
+					blackboard.add_shape(std::move(line));
 				}
 				else {
 					std::cout << "Can`t add the same shapes on board\n";
@@ -54,7 +52,7 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 			if (rectangle->check_valid()) {
 				if (!blackboard.is_clone(rectangle)) {
 					rectangle->draw(blackboard);
-					blackboard.get_shapes().push_back(std::move(rectangle));
+					blackboard.add_shape(std::move(rectangle));
 				}
 				else {
 					std::cout << "Can`t add the same shapes on board\n";
@@ -67,7 +65,7 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 			if (triangle->check_valid()) {
 				if (!blackboard.is_clone(triangle)) {
 					triangle->draw(blackboard);
-					blackboard.get_shapes().push_back(std::move(triangle));
+					blackboard.add_shape(std::move(triangle));
 				}
 				else {
 					std::cout << "Can`t add the same shapes on board\n";
@@ -83,15 +81,15 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 		blackboard.print();
 	}
 	else if (command == "list") {
-		for (int i = 0; i < blackboard.get_shapes().size(); i++) {
-			blackboard.get_shapes()[i]->info_print();
+		for (int i = 0; i < blackboard.size_count(); i++) {
+			blackboard.get_shape(i)->info_print();
 		}
 	}
 	else if (command == "shapes") {
 		std::printf("1. Circle: x y color radius is_filled \n 2. Rectangle: x y color width heigth is_filled \n 3. Line: x y color lenght is_horisontal \n 4. Triangle: x y color heigth is_filled \n ");
 	}
 	else if (command == "select") {
-		if (blackboard.get_shapes().size() == 0) {
+		if (blackboard.size_count() == 0) {
 			std::printf("no shapes on board\n");
 			return;
 		}
@@ -101,9 +99,9 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 			if (ss >> y_str) {
 				int x = convertIntoDigit(x_str);
 				int y = convertIntoDigit(y_str);
-				for (int i = blackboard.get_shapes().size() - 1; i >= 0; i--) {
-					if (blackboard.get_shapes()[i]->contains(x, y)) {
-						shapes[i]->info_print();
+				for (int i = blackboard.size_count() - 1; i >= 0; i--) {
+					if (blackboard.get_shape(i)->contains(x, y)) {
+						blackboard.get_shape(i)->info_print();
 						blackboard.select(i);
 						break;
 					}
@@ -111,14 +109,14 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 			}
 			else {
 				int id = convertIntoDigit(x_str);
-				for (int i = 0; i < blackboard.get_shapes().size(); i++) {
-					if (blackboard.get_shapes()[i]->get_id() == id) {
-						shapes[i]->info_print();
+				for (int i = 0; i < blackboard.size_count(); i++) {
+					if (blackboard.get_shape(i)->get_id() == id) {
+						blackboard.get_shape(i)->info_print();
 						blackboard.select(i);
 						break;
 					}
 					else {
-						if (i == shapes.size() - 1) {
+						if (i == blackboard.size_count() - 1) {
 							std::printf("shape was not found\n");
 						}
 					}
@@ -133,9 +131,9 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 	}
 
 	else if (command == "remove") {
-		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
-			shapes[blackboard.get_selected_shape()]->remove(blackboard);
-			shapes.erase(shapes.begin() + blackboard.get_selected_shape());
+		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < blackboard.size_count()) {
+			blackboard.get_shape(blackboard.get_selected_shape())->remove(blackboard);
+			blackboard.remove_shape_at(blackboard.get_selected_shape());
 			RenewScreen(blackboard);
 			blackboard.select(-1);
 		}
@@ -145,9 +143,9 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 
 	}
 	else if (command == "edit") {
-		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
-			shapes[blackboard.get_selected_shape()]->remove(blackboard);
-			shapes[blackboard.get_selected_shape()]->edit(blackboard, ss);
+		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < blackboard.size_count()) {
+			blackboard.get_shape(blackboard.get_selected_shape())->remove(blackboard);
+			blackboard.get_shape(blackboard.get_selected_shape())->edit(blackboard, ss);
 			RenewScreen(blackboard);
 		}
 		else {
@@ -157,22 +155,22 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 	}
 	else if (command == "clear") {
 
-		for (int i = 0; i < shapes.size(); i++) {
-			shapes[i]->remove(blackboard);
+		for (int i = 0; i < blackboard.size_count(); i++) {
+			blackboard.get_shape(i)->remove(blackboard);
 		}
-		shapes.clear();
+		blackboard.clear_shapes();
 		blackboard.select(-1);
 		std::printf("Board is cleared!\n");
 	}
 	else if (command == "move") {
-		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
+		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < blackboard.size_count()) {
 			std::string x_str, y_str;
 			if (ss >> x_str >> y_str) {
 				int x = convertIntoDigit(x_str);
 				int y = convertIntoDigit(y_str);
 				if (x >= 0 && y >= 0 && x < BOARD_WIDTH && y < BOARD_HEIGHT) {
-					shapes[blackboard.get_selected_shape()]->remove(blackboard);
-					shapes[blackboard.get_selected_shape()]->move_to(x, y);
+					blackboard.get_shape(blackboard.get_selected_shape())->remove(blackboard);
+					blackboard.get_shape(blackboard.get_selected_shape())->move_to(x, y);
 					RenewScreen(blackboard);
 				}
 				else {
@@ -191,11 +189,11 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 
 	}
 	else if (command == "paint") {
-		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < shapes.size()) {
+		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < blackboard.size_count()) {
 			std::string color;
 			if (ss >> color) {
-				shapes[blackboard.get_selected_shape()]->remove(blackboard);
-				shapes[blackboard.get_selected_shape()]->paint(color[0]);
+				blackboard.get_shape(blackboard.get_selected_shape())->remove(blackboard);
+				blackboard.get_shape(blackboard.get_selected_shape())->paint(color[0]);
 				RenewScreen(blackboard);
 			}
 			else {
@@ -216,8 +214,8 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 				printf("Issues with opening file\n");
 				return;
 			}
-			for (int i = 0; i < shapes.size(); i++) {
-				outFile << shapes[i]->add_info_for_save();
+			for (int i = 0; i < blackboard.size_count(); i++) {
+				outFile << blackboard.get_shape(i)->add_info_for_save();
 				outFile << "\n";
 			}
 			outFile << "end";

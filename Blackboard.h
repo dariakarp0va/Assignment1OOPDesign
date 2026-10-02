@@ -19,7 +19,11 @@ public:
 	void load_board(std::ofstream& OutFile);
 	void insert(int x, int y, char color);
 	bool is_clone(std::unique_ptr<Shape>& shape);
-	std::vector<std::unique_ptr<Shape>>& get_shapes();
 	int get_selected_shape();
+	void add_shape(std::unique_ptr<Shape> shape);
+	int size_count();
+	void clear_shapes();
+	void remove_shape_at(int index);
+	Shape* get_shape(int index);
 	void select(int shape);
 };

@@ -53,6 +53,10 @@ void Blackboard::insert(int x, int y, char color) {
 	}
 
 }
+void Blackboard::add_shape(std::unique_ptr<Shape> shape) {
+	shapes.push_back(std::move(shape));
+}
+
 bool Blackboard::is_clone(std::unique_ptr<Shape>& shape) {
 	for (int i = 0; i < shapes.size(); i++) {
 		if (shapes[i]->add_info_for_save() == shape->add_info_for_save()) {
@@ -61,12 +65,21 @@ bool Blackboard::is_clone(std::unique_ptr<Shape>& shape) {
 	}
 	return 0;
 }
-std::vector<std::unique_ptr<Shape>>& Blackboard::get_shapes() {
-	return shapes;
-}
 int Blackboard::get_selected_shape() {
 	return selected_shape;
 }
 void Blackboard::select(int shape) {
 	selected_shape = shape;
+}
+int Blackboard::size_count() {
+	return shapes.size();
+}
+void Blackboard::remove_shape_at(int index) {
+	shapes.erase(shapes.begin() + index);
+}
+void Blackboard::clear_shapes() {
+	shapes.clear();
+}
+Shape* Blackboard::get_shape(int index) {
+	return shapes[index].get();
 }
