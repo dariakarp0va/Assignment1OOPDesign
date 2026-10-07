@@ -13,7 +13,7 @@ Line::Line(std::stringstream& ss) {
 	if (Line::apply_parameters(ss)) {
 		id = unique_id;
 		unique_id++;
-		type = "line"
+		type = "line";
 	}
 	else {
 		std::cout << "Invalid parameters\n";
@@ -68,8 +68,10 @@ bool Line::contains(int target_x, int target_y) {
 void Line::edit(std::stringstream& ss) {
 	std::string type;
 	ss >> type;
-	if (!Line::apply_parameters(ss)){
-		std::cout << "Invalid parametrs\n";
+	if (type == "line"){
+		if (!Line::apply_parameters(ss)) {
+			std::cout << "Invalid parametrs\n";
+		}
 	}
 	else {
 		std::cout << "You can`t change the type of shape\n";
