@@ -1,27 +1,31 @@
-add triangle 10 20 p 10 0
+add circle 10 10 p 5 0
+add circle 75 10 p 5 0
+add triangle 16 5 w 6 0
+add circle 20 20 m 5 1
+add rectangle 20 20 b 5 10 1
 end
                                                                                 
                                                                                 
                                                                                 
                                                                                 
                                                                                 
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-          p                                                                     
-         p p                                                                    
-        p   p                                                                   
-       p     p                                                                  
-      p       p                                                                 
+        ppppp   w                                                        ppppp  
+       p     p w w                                                      p     p 
+      p       w   w                                                    p       p
+     p       w p   w                                                  p         
+     p      w  p    w                                                 p         
+     p     wwwwwwwwwww                                                p         
+     p         p                                                      p         
+     p         p                                                      p         
+      p       p                                                        p       p
+       p     p                                                          p     p 
+        ppppp     mmmmm                                                  ppppp  
+                 mmmmmmm                                                        
+                mmmmmmmmm                                                       
+               mmmmmmmmmmm                                                      
+               mmmmmmmmmmm                                                      
+               mmmmmbbbbbm                                                      
+               mmmmmbbbbbm                                                      
+               mmmmmbbbbbm                                                      
+                mmmmbbbbb                                                       
+                 mmmbbbbb                                                       

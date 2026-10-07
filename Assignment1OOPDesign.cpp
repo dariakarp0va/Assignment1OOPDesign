@@ -37,8 +37,13 @@ int convertIntoDigit(std::string lineNum)
 			return -1;
 		}
 	}
-	int LineNum = std::stoll(lineNum);
-	return LineNum;
+	try {
+		return std::stoi(lineNum); 
+	}
+	catch (const std::exception& e) {
+		std::cout << "number is too large\n";
+		return -1;
+	}
 }
 
 int main()

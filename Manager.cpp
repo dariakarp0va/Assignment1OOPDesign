@@ -145,7 +145,7 @@ void Manager::Handle_Type(std::string command, std::stringstream& ss, Blackboard
 	else if (command == "edit") {
 		if (0 <= blackboard.get_selected_shape() && blackboard.get_selected_shape() < blackboard.size_count()) {
 			blackboard.get_shape(blackboard.get_selected_shape())->remove(blackboard);
-			blackboard.get_shape(blackboard.get_selected_shape())->edit(blackboard, ss);
+			blackboard.get_shape(blackboard.get_selected_shape())->edit(ss);
 			RenewScreen(blackboard);
 		}
 		else {
