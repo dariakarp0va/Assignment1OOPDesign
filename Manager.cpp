@@ -270,6 +270,9 @@ void Manager::run(Blackboard& blackboard) {
 		std::stringstream ss(input_line);
 		std::string action;
 		ss >> action;
+		if (action == "exit") {
+			return;
+		}
 		Handle_Type(action, ss, blackboard);
 	}
 }

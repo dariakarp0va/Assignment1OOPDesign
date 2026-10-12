@@ -58,10 +58,10 @@ bool Line::apply_parameters(std::stringstream& ss) {
 }
 bool Line::contains(int target_x, int target_y) {
 	if (horison) {
-		return target_x >= coordinate_x && target_x < coordinate_x + length;
+		return target_x >= coordinate_x && target_x < coordinate_x + length && coordinate_y == target_y;
 	}
 	else {
-		return target_y >= coordinate_y && target_y < coordinate_y + length;
+		return target_y >= coordinate_y && target_y < coordinate_y + length && coordinate_x == target_x;
 	}
 	return 0;
 }
@@ -72,7 +72,7 @@ void Line::edit(std::stringstream& ss) {
 		if (!Line::apply_parameters(ss)) {
 			std::cout << "Invalid parametrs\n";
 		}
-	}
+	}    
 	else {
 		std::cout << "You can`t change the type of shape\n";
 	}
